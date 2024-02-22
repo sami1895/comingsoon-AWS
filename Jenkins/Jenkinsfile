@@ -1,4 +1,4 @@
-ipeline {
+pipeline {
     agent any
 
     environment {
@@ -20,56 +20,23 @@ ipeline {
         }
         stage('Delete Cluster') {
             steps {
-              // You will need to install CloudBees AWS Credentials Plugin in Jenkins and add AWS Credentials first 
-                withCredentials([[
-                  $class: 'AmazonWebServicesCredentialsBinding',
-                  credentialsId: "aws-credentials",
-                  accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                  ]]) {
-                  sh "eksctl delete cluster --name comingsoon-cluster --region us-east-1"
+                  sh "kubectl delete cluster --name comingsoon-cluster"
                   sleep(time: 180, unit: "SECONDS")
                 }
             }
-        }
         stage('Create Cluster') {
             steps {
-              // You will need to install CloudBees AWS Credentials Plugin in Jenkins and add AWS Credentials first 
-                withCredentials([[
-                  $class: 'AmazonWebServicesCredentialsBinding',
-                  credentialsId: "aws-credentials",
-                  accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                  ]]) {
                   sh """
-                  eksctl create cluster --name comingsoon-cluster --region us-east-1 --nodes=2
+                  kubectl create cluster --name comingsoon-cluster --region us-east-1 --nodes=2
                   aws eks update-kubeconfig --name comingsoon-cluster
                   """
                 }
             }
-        }
         stage('Create Namespace') {
-            steps {
-              // You will need to install CloudBees AWS Credentials Plugin in Jenkins and add AWS Credentials first 
-                withCredentials([[
-                  $class: 'AmazonWebServicesCredentialsBinding',
-                  credentialsId: "aws-credentials",
-                  accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                  ]]) {
                   sh "kubectl create namespace comingsoon"
                 }
-            }
-        }
         stage('Deploy') {
             steps {
-              // You will need to install CloudBees AWS Credentials Plugin in Jenkins and add AWS Credentials first 
-                withCredentials([[
-                  $class: 'AmazonWebServicesCredentialsBinding',
-                  credentialsId: "aws-credentials",
-                  accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                  ]]) {
                   sh """
                   cd comingsoon/k8s
                   kubectl -n comingsoon apply -f deployment.yaml
@@ -77,6 +44,5 @@ ipeline {
                   """
                 }
             }
-        }
     }
 }
