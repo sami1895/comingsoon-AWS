@@ -20,5 +20,5 @@
   
   - name: push image to dockerhub
     # Make sure to change the image name with your personal dockerhub account and reposiroty 
-    command: docker push comingsoon-pages:0.0.02
+    command: docker push imas10/comingsoon-pages:0.0.02
 
