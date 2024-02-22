@@ -28,7 +28,6 @@ pipeline {
             steps {
                   sh """
                   kubectl create cluster --name comingsoon-cluster --region us-east-1 --nodes=2
-                  aws eks update-kubeconfig --name comingsoon-cluster
                   """
                 }
             }
