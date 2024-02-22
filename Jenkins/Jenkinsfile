@@ -2,58 +2,49 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')
-    }
-
+		DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+	}
     stages {
         stage('Docker Login') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKERHUB_CREDENTIALS_PSW', usernameVariable: 'DOCKERHUB_CREDENTIALS_USR')]) {
-                        sh "docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin <<< $DOCKERHUB_CREDENTIALS_PSW"
-                    }
-                }
+              sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
             }
         }
-
-        stage('Build & Push Dockerfile') {
+        stage('Build & push Dockerfile') {
             steps {
-                script {
-                    dir('comingsoon/') {
-                        sh 'ansible-playbook playbook.yml'
-                    }
-                }
+              sh """
+              cd comingsoon/
+              ansible-playbook playbook.yml
+              """
             }
         }
-
-        stage('Create Cluster') {
-            steps {
-                sh """
-                eksctl create cluster --name comingsoon-cluster --region us-east-1 --nodes=2
-                """
-            }
-        }
-
         stage('Delete Cluster') {
             steps {
-                sh "eksctl delete cluster --name comingsoon-cluster --wait"
+                  sh "minikube delete cluster --name comingsoon-cluster"
+                  sleep(time: 180, unit: "SECONDS")
+                }
             }
-        }
-
+        stage('Create Cluster') {
+            steps {
+                  sh """
+                  minikube start create cluster --name comingsoon-cluster --nodes=2
+                  """
+                }
+            }
         stage('Create Namespace') {
             steps {
-                sh "kubectl create namespace comingsoon || true"
+                  sh "kubectl create namespace comingsoon"
+                }
             }
-        }
-
         stage('Deploy') {
             steps {
-                dir('comingsoon/k8s') {
-                    sh """
-                    kubectl apply -f deployment.yaml -n comingsoon
-                    kubectl apply -f services.yaml -n comingsoon
-                    """
+                  sh """
+                  cd comingsoon/k8s
+                  kubectl -n comingsoon apply -f deployment.yaml
+                  kubectl -n comingsoon apply -f services.yaml
+                  """
                 }
             }
         }
     }
+}
