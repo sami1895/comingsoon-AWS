@@ -20,14 +20,14 @@ pipeline {
         }
         stage('Delete Cluster') {
             steps {
-                  sh "minikube delete cluster -n comingsoon-cluster"
+                  sh "minikube delete cluster comingsoon-cluster"
                   sleep(time: 180, unit: "SECONDS")
                 }
             }
         stage('Create Cluster') {
             steps {
                   sh """
-                  minikube start create cluster --name comingsoon-cluster --nodes=2
+                  minikube start create cluster comingsoon-cluster --nodes=2
                   """
                 }
             }
