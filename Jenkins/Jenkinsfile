@@ -27,7 +27,7 @@ pipeline {
         stage('Create Cluster') {
             steps {
                   sh """
-                  minikube start create cluster --name comingsoon-cluster --nodes=2
+                  minikube start create cluster comingsoon-cluster --nodes=2
                   """
                 }
             }
