@@ -18,12 +18,6 @@ pipeline {
               """
             }
         }
-        stage('Delete Cluster') {
-            steps {
-                  sh "minikube delete --all --purge"
-                  sleep(time: 180, unit: "SECONDS")
-                }
-            }
         stage('Create Cluster') {
             steps {
                   sh """
